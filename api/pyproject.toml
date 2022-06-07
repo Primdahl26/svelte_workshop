@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "api"
+version = "0.1.0"
+description = ""
+authors = ["Frederik Vincent Primdahl <fv@magenta-aps.dk>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.78.0"
+Faker = "^13.12.1"
+uvicorn = "^0.17.6"
+strawberry-graphql = {extras = ["fastapi"], version = "^0.114.0"}
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
