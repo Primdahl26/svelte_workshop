@@ -78,53 +78,27 @@
 	}
 
 	const modifyData = (event: Event) => {
-		// console.log(event.target)
 		const data = new FormData(event.target)
 
-		const value = Object.fromEntries(data.entries())
-
-		value.fields = data.getAll('fields')
-		console.log(data)
-		console.log(data.entries())
-
-		let selectedFields: string[] = ['ost']
+		let selectedFields: string[] = []
 		for (const x of data.entries()) {
-			selectedFields.push(x[0])
+			if (x[1] === 'on') {
+				selectedFields.push(x[0])
+			}
 		}
 
-		if (selectedFields) {
-			insightQuery = buildQuery((fields = selectedFields))
-		}
-		refresh()
-		return
-		insightQuery = `
-      query MyQuery {
-        getInsight(skip: 0, limit: ${target.value}) {
-          id
-          departmentName
-          employeeEmail
-          employeeName
-          managerEmail
-          managersName
-        }
-      }
-    `
+		insightQuery = buildQuery(data.get('skip'), data.get('limit'), selectedFields)
 		refresh()
 	}
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
-
-<button on:click={refresh}>Refresh data</button>
-<br />
-<input type="number" on:change={modifyData} value="5" />
+<h1>Velkommen til indsigt</h1>
 
 <form class="content" on:submit|preventDefault={modifyData}>
 	<label for="skip">Skip</label>
-	<input id="skip" type="number" value="0" />
+	<input name="skip" type="number" value="0" />
 	<label for="limit">Limit</label>
-	<input id="limit" type="number" value="5" />
+	<input name="limit" type="number" value="5" />
 	<label for="fields">Fields</label>
 	{#each defaultFields as field}
 		<input name={field} type="checkbox" checked />
