@@ -8,6 +8,20 @@
 		managersName: string
 	}
 
+	let search: string
+
+	let insightQuery = `
+      query MyQuery {
+        getInsight(skip: 0, limit: 5) {
+          id
+          departmentName
+          employeeEmail
+          employeeName
+          managerEmail
+          managersName
+        }
+      }
+  `
 	const defaultFields: string[] = [
 		'id',
 		'departmentName',
@@ -20,18 +34,7 @@
 	let selectedFields: string[] = defaultFields
 	let skip = 0
 	let limit = 10
-	let insightQuery = `
-      query MyQuery {
-        getInsight(skip: ${skip}, limit: ${limit}) {
-          id
-          departmentName
-          employeeEmail
-          employeeName
-          managerEmail
-          managersName
-        }
-      }
-    `
+
 	const buildQuery = (skip: number = 0, limit: number = 10, fields: string[] = defaultFields) => {
 		return `
       query MyQuery {
@@ -57,6 +60,7 @@
 	// 		console.log('lol')
 	// 		return result.data.getInsight
 	// 	})
+	let tis
 
 	// The "oldschool" way
 	const fetchInsight = async (): Promise<Insight[]> => {
@@ -71,6 +75,7 @@
 		})
 
 		const result = await res.json()
+		tis = result.data.getInsight
 		return result.data.getInsight
 	}
 
@@ -106,6 +111,18 @@
 			refresh()
 		}
 	}
+
+	$: visibleData = search
+		? tis.filter((user) => {
+				return (
+					user.employeeName.match(`${search}.*`) ||
+					user.employeeEmail.match(`${search}.*`) ||
+					user.departmentName.match(`${search}.*`) ||
+					user.managersName.match(`${search}.*`) ||
+					user.managerEmail.match(`${search}.*`)
+				)
+		  })
+		: tis
 </script>
 
 <h1>Velkommen til indsigt</h1>
@@ -135,6 +152,8 @@
 	<br />
 {/each}
 
+<input type="search" bind:value={search} placeholder="Search" />
+
 <br />
 <table>
 	<thead>
@@ -153,14 +172,26 @@
 			</tr>
 		</tbody>
 	{:then insights}
-		{#each insights as insight}
-			<tbody>
-				<tr>
-					{#each Object.values(insight) as field}
-						<td>{field}</td>
-					{/each}
-				</tr>
-			</tbody>
-		{/each}
+		{#if search}
+			{#each visibleData as insight}
+				<tbody>
+					<tr>
+						{#each Object.values(insight) as field}
+							<td>{field}</td>
+						{/each}
+					</tr>
+				</tbody>
+			{/each}
+		{:else}
+			{#each insights as insight}
+				<tbody>
+					<tr>
+						{#each Object.values(insight) as field}
+							<td>{field}</td>
+						{/each}
+					</tr>
+				</tbody>
+			{/each}
+		{/if}
 	{/await}
 </table>
