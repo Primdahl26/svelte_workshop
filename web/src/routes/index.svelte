@@ -8,18 +8,6 @@
 		managersName: string
 	}
 
-	let insightQuery = `
-      query MyQuery {
-        getInsight(skip: 0, limit: 5) {
-          id
-          departmentName
-          employeeEmail
-          employeeName
-          managerEmail
-          managersName
-        }
-      }
-`
 	const defaultFields: string[] = [
 		'id',
 		'departmentName',
@@ -30,8 +18,21 @@
 	]
 
 	let selectedFields: string[] = defaultFields
-
-	const buildQuery = (skip: number = 0, limit: number = 5, fields: string[] = defaultFields) => {
+	let skip = 0
+	let limit = 10
+	let insightQuery = `
+      query MyQuery {
+        getInsight(skip: ${skip}, limit: ${limit}) {
+          id
+          departmentName
+          employeeEmail
+          employeeName
+          managerEmail
+          managersName
+        }
+      }
+    `
+	const buildQuery = (skip: number = 0, limit: number = 10, fields: string[] = defaultFields) => {
 		return `
       query MyQuery {
         getInsight(skip: ${skip}, limit: ${limit}) {
@@ -79,23 +80,6 @@
 		data = fetchInsight()
 	}
 
-	const modifyData = (event: Event) => {
-		const element = event.target as HTMLFormElement
-		const form = new FormData(element)
-
-		selectedFields = []
-		for (const x of form.entries()) {
-			if (x[1] === 'on') {
-				selectedFields.push(x[0])
-			}
-		}
-
-		const skip: any = form.get('skip')
-		const limit: any = form.get('limit')
-
-		insightQuery = buildQuery(skip, limit, selectedFields)
-		refresh()
-	}
 	// Holds table sort state.  Initialized to reflect table sorted by id column ascending.
 	let sortBy = { col: 'id', ascending: true }
 
@@ -115,23 +99,41 @@
 
 		data = (await data).sort(sort)
 	}
+
+	$: {
+		if (limit) {
+			insightQuery = buildQuery(skip, limit, selectedFields)
+			refresh()
+		}
+	}
 </script>
 
 <h1>Velkommen til indsigt</h1>
 
-<form class="content" on:submit|preventDefault={modifyData}>
-	<label for="skip">Skip</label>
-	<input name="skip" type="number" value="0" />
-	<label for="limit">Limit</label>
-	<input name="limit" type="number" value="5" />
-	<label for="fields">Fields</label>
-	{#each defaultFields as field}
-		<input name={field} type="checkbox" checked />
-		{field}
-		<br />
-	{/each}
-	<button type="submit">Submit</button>
-</form>
+<label for="skip">Skip</label>
+<input name="skip" type="number" min="0" bind:value={skip} />
+<label for="limit">Limit</label>
+<input name="limit" type="number" min="0" max="1000" bind:value={limit} />
+<label for="fields">Fields</label>
+
+{#each defaultFields as field}
+	<input
+		name={field}
+		type="checkbox"
+		on:change={() => {
+			if (selectedFields.includes(field)) {
+				selectedFields = selectedFields.filter((e) => e !== field)
+			} else {
+				selectedFields.push(field)
+			}
+			insightQuery = buildQuery(skip, limit, selectedFields)
+			refresh()
+		}}
+		checked
+	/>
+	{field}
+	<br />
+{/each}
 
 <br />
 <table>
