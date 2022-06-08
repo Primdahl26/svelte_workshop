@@ -9,10 +9,11 @@
 	}
 
 	let search: string
-
+	let skip = 0
+	let limit = 10
 	let insightQuery = `
       query MyQuery {
-        getInsight(skip: 0, limit: 5) {
+        getInsight(skip: ${skip}, limit: ${limit}) {
           id
           departmentName
           employeeEmail
@@ -32,8 +33,6 @@
 	]
 
 	let selectedFields: string[] = defaultFields
-	let skip = 0
-	let limit = 10
 
 	const buildQuery = (skip: number = 0, limit: number = 10, fields: string[] = defaultFields) => {
 		return `
@@ -114,13 +113,20 @@
 
 	$: visibleData = search
 		? tis.filter((user) => {
-				return (
-					user.employeeName.match(`${search}.*`) ||
-					user.employeeEmail.match(`${search}.*`) ||
-					user.departmentName.match(`${search}.*`) ||
-					user.managersName.match(`${search}.*`) ||
-					user.managerEmail.match(`${search}.*`)
-				)
+				// TODO: This is really ugly and only surves to make sure we dont
+				// run .toLowercase on undefined values
+				const employeeName =
+					user.employeeName && user.employeeName.toLowerCase().match(`${search.toLowerCase()}.*`)
+				const employeeEmail =
+					user.employeeEmail && user.employeeEmail.toLowerCase().match(`${search.toLowerCase()}.*`)
+				const departmentName =
+					user.departmentName &&
+					user.departmentName.toLowerCase().match(`${search.toLowerCase()}.*`)
+				const managersName =
+					user.managersName && user.managersName.toLowerCase().match(`${search.toLowerCase()}.*`)
+				const id = user.id && user.id.toLowerCase().match(`${search.toLowerCase()}.*`)
+
+				return employeeName || employeeEmail || departmentName || managersName || id
 		  })
 		: tis
 </script>
@@ -152,6 +158,7 @@
 	<br />
 {/each}
 
+<br />
 <input type="search" bind:value={search} placeholder="Search" />
 
 <br />
