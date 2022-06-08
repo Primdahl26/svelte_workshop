@@ -11,16 +11,16 @@
 	let insightQuery = `
       query MyQuery {
         getInsight(skip: 0, limit: 5) {
+          id
           departmentName
           employeeEmail
           employeeName
-          id
           managerEmail
           managersName
         }
       }
 `
-	const defaultFields = [
+	const defaultFields: string[] = [
 		'id',
 		'departmentName',
 		'employeeEmail',
@@ -28,6 +28,8 @@
 		'managerEmail',
 		'managersName'
 	]
+
+	let selectedFields: string[] = defaultFields
 
 	const buildQuery = (skip: number = 0, limit: number = 5, fields: string[] = defaultFields) => {
 		return `
@@ -71,24 +73,47 @@
 		return result.data.getInsight
 	}
 
-	let data = fetchInsight()
+	let data: Promise<Insight[]> | Insight[] = fetchInsight()
 
 	const refresh = () => {
 		data = fetchInsight()
 	}
 
 	const modifyData = (event: Event) => {
-		const data = new FormData(event.target)
+		const element = event.target as HTMLFormElement
+		const form = new FormData(element)
 
-		let selectedFields: string[] = []
-		for (const x of data.entries()) {
+		selectedFields = []
+		for (const x of form.entries()) {
 			if (x[1] === 'on') {
 				selectedFields.push(x[0])
 			}
 		}
 
-		insightQuery = buildQuery(data.get('skip'), data.get('limit'), selectedFields)
+		const skip: any = form.get('skip')
+		const limit: any = form.get('limit')
+
+		insightQuery = buildQuery(skip, limit, selectedFields)
 		refresh()
+	}
+	// Holds table sort state.  Initialized to reflect table sorted by id column ascending.
+	let sortBy = { col: 'id', ascending: true }
+
+	$: sort = async (column: string) => {
+		if (sortBy.col == column) {
+			sortBy.ascending = !sortBy.ascending
+		} else {
+			sortBy.col = column
+			sortBy.ascending = true
+		}
+
+		// Modifier to sorting function for ascending or descending
+		let sortModifier = sortBy.ascending ? 1 : -1
+
+		let sort = (a: any, b: any) =>
+			a[column] < b[column] ? -1 * sortModifier : a[column] > b[column] ? 1 * sortModifier : 0
+
+		data = (await data).sort(sort)
 	}
 </script>
 
@@ -109,14 +134,31 @@
 </form>
 
 <br />
-{#await data}
-	Henter...
-{:then insights}
-	{#each insights as insight}
-		{#each Object.values(insight) as field}
-			{field}
-			<br />
+<table>
+	<thead>
+		<tr>
+			{#each selectedFields as header}
+				<th scope="col" on:click={() => sort(header)}>{header}</th>
+			{/each}
+		</tr>
+	</thead>
+	{#await data}
+		<tbody>
+			<tr>
+				{#each selectedFields as _}
+					<th aria-busy="true" />
+				{/each}
+			</tr>
+		</tbody>
+	{:then insights}
+		{#each insights as insight}
+			<tbody>
+				<tr>
+					{#each Object.values(insight) as field}
+						<td>{field}</td>
+					{/each}
+				</tr>
+			</tbody>
 		{/each}
-		<br />
-	{/each}
-{/await}
+	{/await}
+</table>
