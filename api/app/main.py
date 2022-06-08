@@ -3,9 +3,20 @@ from faker import Faker
 import strawberry
 from strawberry.fastapi import GraphQLRouter
 import uuid
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 FAKER_AMOUNT = 1000
 fake = Faker(["da-DK"])
