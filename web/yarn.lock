@@ -753,10 +753,10 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-magenta-components-demo@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/magenta-components-demo/-/magenta-components-demo-0.0.4.tgz#def5994fa0254a0d3a58b55f481a347d91e43d54"
-  integrity sha512-1drOAR/jYCXz+kU0V9XW1s+k843dkmBZt2Z90uk+plDd6i4FKSpnLvX6FMKrVrcO0EiAb/4eOEBN5tOuJSJslQ==
+magenta-components-demo@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/magenta-components-demo/-/magenta-components-demo-0.1.2.tgz#6d8d887133661ee9b8bb307fd1f6458427d54d3e"
+  integrity sha512-75IZkpRTM0GLqauUtqFdIG/38cmEWEnjkg6Lktp2Q5psVUBMnpKFuAfJ1o/g77df4lMuXTW2Cs61ndujjhB5mw==
 
 magic-string@^0.25.7:
   version "0.25.9"

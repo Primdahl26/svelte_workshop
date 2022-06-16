@@ -3,6 +3,6 @@
 </script>
 
 <div class="container">
-	<Navbar brand="Magenta" />
+	<Navbar />
 	<slot />
 </div>
