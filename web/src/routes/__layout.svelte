@@ -1,8 +1,8 @@
 <script>
-	import Navbar from '$lib/components/navbar.svelte'
+	import { Navbar } from 'magenta-components-demo'
 </script>
 
-<Navbar />
 <div class="container">
+	<Navbar brand="Magenta" />
 	<slot />
 </div>
